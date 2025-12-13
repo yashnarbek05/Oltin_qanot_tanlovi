@@ -1,0 +1,391 @@
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from telegram.ext import (
+    ContextTypes,
+    ConversationHandler, CallbackContext,
+)
+
+import traceback, time
+
+from telegram.error import BadRequest
+
+
+
+from config import REQUESTED_CHANNELS, ADMIN_ID, TTL, SANATBEK
+
+from sheet.service import get_count, add_user, is_registreted, update_count, get_winnerss 
+
+IS_SUB = 0
+LANGUAGE = 1
+CONTACT = 2
+FULLNAME = 3
+LINK = 4
+
+async def start(update, context):
+    user_id = update.effective_user.id
+
+    text = update.message.text.split(" ")
+    invited_by = text[1] if len(text) == 2 else ""
+
+    context.user_data["invited_by"] = invited_by
+    
+    if await is_registreted(user_id):
+
+        await update.message.reply_text("Siz allaqachon ko'nkursda ishtirok etmoqdasiz.\nUshbu buyruqni berish orqali to'plagan ballingizni ko'rishingiz mumkin /myscore!")
+
+        clear_datas(context)
+        return ConversationHandler.END
+
+
+    is_sub = await check_user_in_channels(user_id, context)
+
+    if not is_sub:
+        await send_subscribe_message(user_id, context)
+        return IS_SUB
+
+    await update.message.reply_text("Xush kelibsiz! 🎉")
+
+    if invited_by: 
+        await update_count(invited_by)
+
+    keyboard = [
+            [InlineKeyboardButton("English🇺🇸", callback_data="en")],
+            [InlineKeyboardButton("O'zbek🇺🇿", callback_data="uz")],
+            [InlineKeyboardButton("Русский🇷🇺", callback_data="ru")]
+        ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text("Tilni tanlang:", reply_markup=reply_markup)
+
+    return LANGUAGE
+
+
+
+async def check_user_in_channels(user_id: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    for channel in REQUESTED_CHANNELS:
+        try:
+            member = await context.bot.get_chat_member(chat_id=f"@{channel}", user_id=user_id)
+            if member.status not in ("member", "administrator", "creator"):
+                return False
+        except BadRequest:
+            return False
+
+    return True
+
+
+async def send_subscribe_message(user_id, context):
+    keyboard = []
+
+    for channel in REQUESTED_CHANNELS:
+        keyboard.append([
+            InlineKeyboardButton(
+                text=channel,
+                url=f"https://t.me/{channel}"
+            )
+        ])
+
+    keyboard.append([
+        InlineKeyboardButton("Ezgu_uz", url="https://www.instagram.com/volunteers_uz")
+    ])
+
+    keyboard.append([
+        InlineKeyboardButton("Obuna bo'ldim ✅", callback_data="sub")
+    ])
+
+    await context.bot.send_message(
+        chat_id=user_id,
+        text="Majburiy kanallarga obuna bo'ling:",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+
+async def catch_subscribed(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    user_id = query.from_user.id
+
+    is_subscribed = await check_user_in_channels(user_id, context)
+
+    if is_subscribed:
+        await query.edit_message_text("✅ Obuna tasdiqlandi. Davom etishingiz mumkin.")
+        if context.user_data.get("invited_by"): 
+            await update_count(context.user_data.get("invited_by"))
+        keyboard = [
+            [InlineKeyboardButton("English🇺🇸", callback_data="en")],
+            [InlineKeyboardButton("O'zbek🇺🇿", callback_data="uz")],
+            [InlineKeyboardButton("Русский🇷🇺", callback_data="ru")]
+        ]
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await query.edit_message_text("Tilni tanlang:", reply_markup=reply_markup)
+
+        return LANGUAGE
+    else:
+        await query.answer("❌ Hali barcha kanallarga obuna bo‘lmadingiz", show_alert=True)
+        await query.edit_message_text("❌ Hali barcha kanallarga obuna bo‘lmadingiz")
+        await send_subscribe_message(user_id, context)
+        return IS_SUB
+    
+
+async def language(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query = update.callback_query
+
+    
+    messages = {
+        'en': f"Hello, {query.from_user.first_name}! Share your number:",
+        'ru': f"Здравствуйте, {query.from_user.first_name}! Поделитесь своим номером:",
+        'uz': f"Assalomu alaykum, {query.from_user.first_name}! Raqamingizni ulashing:"
+    }
+
+    keyboard = [[KeyboardButton("📞 Share Your Number", request_contact=True)]]
+    reply_markup1 = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
+    
+
+    await query.message.reply_text(text = messages.get(query.data), reply_markup=reply_markup1)
+
+    context.user_data['language'] = query.data
+
+    return CONTACT
+
+
+async def receive_number(update: Update, context: CallbackContext) -> None:
+    contact = update.message.contact
+
+
+    messages = {
+        'en': f"Enter your first and last name to participate in the contest!",
+        'ru': f"ВВведите свое имя и фамилию, чтобы принять участие в конкурсе!",
+        'uz': f"Tanlovda qatnashish uchun ism va familiyangizni kiriting!"
+    }
+    
+    
+    context.user_data["contact"] = contact.phone_number
+    
+    await update.message.reply_text(messages.get(context.user_data.get('language')), reply_markup=ReplyKeyboardRemove())
+
+    return FULLNAME
+
+
+async def fullname(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id = update.effective_user.id
+    user_fullname = update.message.text
+
+    result = all(not char.isdigit() for char in user_fullname)
+
+    if not result:
+        messages = {
+            'uz': f"Siz to'liq ismingizni noto'g'ri kiritdingiz, \"{user_fullname}\"😕, \nqayta yuboring...",
+            'ru': f"Вы неправильно ввели свое полное имя: \"{user_fullname}\"😕, \nотправьте еще раз...",
+            'en': f"You have entered your full name incorrectly: \"{user_fullname}\"😕, \nsend again..."
+        }
+        await update.message.reply_text(messages.get(context.user_data.get('language')))
+        return FULLNAME
+
+    await add_user(user_id, context.user_data.get("contact"), user_fullname)
+
+    keyboard = []
+
+    keyboard.append([
+        InlineKeyboardButton("Create Link🔗", callback_data="link")
+    ])
+
+    messages = {
+            'uz': (
+    "🎉 *“Oltin Qanot” volontyorlari Respublika tanloviga xush kelibsiz!* 🎉\n\n"
+    "Ushbu tanlovda ishtirok etish uchun, bot orqali sizga berilgan maxsus havolalar yordamida "
+    "do'stlaringizni taklif qiling va g'oliblar safidan joy oling!\n\n"
+    "🏆 *G'oliblar quyidagicha taqdirlanadi:*\n\n"
+    "🥇 *1–7-o'rinlar:*\n"
+    "— Diplom va Minnatdorchilik xati\n"
+    "— 2025-yil 21-dekabr, soat 19:00da Humo Arenada bo'lib o'tadigan \"Yangi yil Gala-konserti\" uchun chipta "
+    "(joylar: B206 sektor, 16-qator)\n"
+    "— Esdalik sovg'alari\n\n"
+    "🥈 *8–20-o'rinlar:*\n"
+    "— Diplom va Minnatdorchilik xati\n"
+    "— Yil yakuniga bag'ishlagan konsertlar uchun biletlar\n\n"
+    "🥉 *21–40-o'rinlar:*\n"
+    "— Sertifikatlar\n\n"
+    "👇 *Quyida tugmani bosing va o'z taklifnomangizni do'stlaringizga yuboring 😊*"
+),
+            'ru': (
+    "🎉 *Добро пожаловать на Республиканский конкурс волонтёров “Oltin Qanot”!* 🎉\n\n"
+    "Для участия пригласите своих друзей через специальные ссылки, предоставленные этим ботом, "
+    "и займете место среди победителей!\n\n"
+    "🏆 *Победители будут награждены следующим образом:*\n\n"
+    "🥇 *1–7 места:*\n"
+    "— Диплом и Благодарственное письмо\n"
+    "— Билет на «Новогодний Гала-концерт» 21 декабря 2025 года в 19:00, Humo Arena "
+    "(места: сектор B206, ряд 16)\n"
+    "— Памятные сувениры\n\n"
+    "🥈 *8–20 места:*\n"
+    "— Диплом и Благодарственное письмо\n"
+    "— Билеты на концерт по итогам года\n\n"
+    "🥉 *21–40 места:*\n"
+    "— Сертификаты\n\n"
+    "👇 *Нажмите кнопку ниже, чтобы отправить приглашение своим друзьям 😊*"
+),
+            'en': (
+    "🎉 *Welcome to the “Oltin Qanot” Volunteers National Contest!* 🎉\n\n"
+    "To participate, invite your friends using the special links provided through this bot "
+    "and secure your place among the winners!\n\n"
+    "🏆 *Winners will be rewarded as follows:*\n\n"
+    "🥇 *1–7 places:*\n"
+    "— Diploma and Letter of Appreciation\n"
+    "— Ticket for the “New Year Gala Concert” on December 21, 2025 at 19:00, Humo Arena "
+    "(Seats: B206 sector, row 16)\n"
+    "— Souvenir gifts\n\n"
+    "🥈 *8–20 places:*\n"
+    "— Diploma and Letter of Appreciation\n"
+    "— Tickets for year-end concerts\n\n"
+    "🥉 *21–40 places:*\n"
+    "— Certificates\n\n"
+    "👇 *Click the button below to send your invitation to your friends 😊*"
+)
+        }
+    
+    await update.message.reply_text(messages.get(context.user_data.get('language')),
+                                     reply_markup=InlineKeyboardMarkup(keyboard),
+                                     parse_mode="Markdown")
+    
+    return LINK
+
+
+async def link(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    bot_user = await context.bot.get_me()
+    user_id = update.effective_user.id
+    
+    # Botning fotosini olish
+    photos = await context.bot.get_user_profile_photos(bot_user.id)
+
+    file_id = photos.photos[0][-1].file_id
+
+
+    messages = {
+            'uz': (
+    "🎉 *Do‘stim!* 🎉\n\n"
+    "Sen ham shu tanlovga qatnash! 🏆\n"
+    "Juda koʻp sovgʻalar va ajoyib imkoniyatlar seni kutmoqda ✨🎁\n\n"
+    f"👇 *Ushbu linkni bos va kanallarga azo bo‘lish orqali tanlovda ishtirok et:* \nhttps://t.me/Oltinqanottanlovibot?start={user_id}"
+),
+            'ru': (
+    "🎉 *Привет, друг!* 🎉\n\n"
+    "Прими участие в этом конкурсе! 🏆\n"
+    "Тебя ждёт много подарков и крутых возможностей ✨🎁\n\n"
+    f"👇 *Нажми на эту ссылку и подпишись на каналы, чтобы участвовать в конкурсе:* \nhttps://t.me/Oltinqanottanlovibot?start={user_id}"
+),
+            'en': (
+    "🎉 *Hey friend!* 🎉\n\n"
+    "Join this contest too! 🏆\n"
+    "Lots of amazing gifts and opportunities are waiting for you ✨🎁\n\n"
+    f"👇 *Click this link and subscribe to the channels to participate in the contest:* \nhttps://t.me/Oltinqanottanlovibot?start={user_id}"
+)
+        }
+
+    
+    await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo=file_id,
+            caption=messages.get(context.user_data.get('language')),
+            parse_mode="Markdown"
+        )
+    
+    messages = {
+            'uz': "Ushbu buyruqni berish orqali to'plagan ballingizni ko'rishingiz mumkin /myscore!",
+            'ru': "Вы можете отобразить накопленные баллы, выполнив команду /myscore!",
+            'en': "You can show your accumulated points by issuing this command /myscore!"
+    }
+
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=messages.get(context.user_data.get('language')))
+
+    clear_datas(context)
+    return ConversationHandler.END
+
+
+async def my_count(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(f"Sizning to'plagan ballingiz: {await get_count(update.effective_user.id)}")
+    clear_datas(context)
+    return ConversationHandler.END
+
+
+async def get_winners(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    winners = await get_winnerss()
+    t = 0
+
+    for w in winners:
+        text = (
+            "🏆 <b>G‘olib</b>\n\n"
+            f"👤 <b>Ism:</b> {w[2]}\n"
+            f"📞 <b>Telefon:</b> +{w[1]}\n"
+            f"➕ <b>Qo‘shganlar odamlari soni:</b> {w[3]}\n"
+            f"🆔 <b>Telegram ID:</b> {w[0]}"
+        )
+        if t == 0: 
+            t = t + 1
+            continue
+
+        await context.bot.send_message(chat_id=ADMIN_ID, text= text, parse_mode="HTML")
+        await context.bot.send_message(chat_id=SANATBEK, text= text, parse_mode="HTML")
+    
+    clear_datas(context)
+    return ConversationHandler.END
+
+
+
+def clear_datas(context):
+    context.chat_data.clear()
+    context.user_data.clear()
+
+
+
+async def error_handler(update: Update, context: CallbackContext):
+    # NoneType chat_id xatosini e’tiborsiz qoldirish
+    if context.error and "'NoneType' object has no attribute 'chat_id'" in str(context.error):
+        return
+
+    # To‘liq traceback olish
+    tb = "".join(
+        traceback.format_exception(
+            type(context.error),
+            context.error,
+            context.error.__traceback__
+        )
+    )
+
+    error_text = (
+        "🚨 *Botda xatolik yuz berdi!*\n\n"
+        f"*Xato turi:* `{type(context.error).__name__}`\n\n"
+        f"*Xato matni:*\n`{context.error}`\n\n"
+        f"*Qayerda (traceback):*\n```{tb}```"
+    )
+
+    await context.bot.send_message(
+        chat_id=ADMIN_ID,
+        text=error_text,
+        parse_mode="Markdown"
+    )
+
+    clear_datas(context)
+    return ConversationHandler.END
+
+
+
+async def clear_inactive_users(context: ContextTypes.DEFAULT_TYPE):
+    now = time.time()
+    to_delete = []
+
+    for user_id, data in context.application.user_data.items():
+        last = data.get("last_active")
+        if last and now - last > TTL:
+            to_delete.append(user_id)
+
+    for user_id in to_delete:
+        del context.application.user_data[user_id]
+
+
+
+
+
+
+

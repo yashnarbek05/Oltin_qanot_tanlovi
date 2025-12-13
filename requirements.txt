@@ -1,0 +1,4 @@
+python-telegram-bot~=21.9
+google~=3.0.0
+protobuf~=5.29.2
+google-api-python-client~=2.157.0
