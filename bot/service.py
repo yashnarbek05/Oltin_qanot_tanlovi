@@ -4,9 +4,10 @@ from telegram.ext import (
     ConversationHandler, CallbackContext,
 )
 
+
 import traceback, time
 
-from telegram.error import BadRequest
+from telegram.error import BadRequest, TelegramError
 
 
 
@@ -337,8 +338,13 @@ async def send_messagee(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = update.message.text
 
         words = text.split(" ", 2)
+
+        try:
+            await context.bot.send_message(chat_id=words[1], text=words[2])
+            await context.bot.send_message(chat_id=update.effective_user.id, text="Yuborildi✅")
+        except TelegramError as e:
+            await context.bot.send_message(chat_id=update.effective_user.id, text="Yuborilmadi ❌\n" + e.message)
         
-        await context.bot.send_message(chat_id=words[1], text=words[2])
     else:
         await context.bot.send_message(chat_id=update.effective_user.id, text="Bu buyruq siz uchun emas🙈😊")
     
