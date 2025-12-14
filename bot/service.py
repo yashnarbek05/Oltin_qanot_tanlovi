@@ -11,7 +11,7 @@ from telegram.error import BadRequest, TelegramError
 
 
 
-from config import REQUESTED_CHANNELS, TTL, ADMINS
+from config import REQUESTED_CHANNELS, TTL, ADMINS, BANNED
 
 from sheet.service import get_count, add_user, is_registreted, update_count, get_winnerss 
 
@@ -29,7 +29,7 @@ async def start(update, context):
 
     context.user_data["invited_by"] = invited_by
     
-    if await is_registreted(user_id):
+    if await is_registreted(user_id) or user_id in BANNED:
 
         await update.message.reply_text("Siz allaqachon ko'nkursda ishtirok etmoqdasiz.\nUshbu buyruqni berish orqali to'plagan ballingizni ko'rishingiz mumkin /myscore!")
 
