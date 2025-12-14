@@ -45,7 +45,7 @@ async def update_count(user_id):
             break
      
 
-    request = service.spreadsheets().values().update(spreadsheetId=GOOGLE_SHEET_URL, range=f'{SHEET_NAME}!D{index + 1}',
+    request = service.spreadsheets().values().update(spreadsheetId=GOOGLE_SHEET_URL, range=f'{SHEET_NAME}!D{index + 2}',
                                                      valueInputOption="RAW",
                                                      body={"values": [[int(count) + 1]]})
     response = request.execute()
@@ -86,7 +86,7 @@ async def add_user(user_id, contact, name):
 
     users = await get_values_from_sheet()
 
-    request = service.spreadsheets().values().update(spreadsheetId=GOOGLE_SHEET_URL, range=f'{SHEET_NAME}!A{len(users) + 1}:D{len(users) + 1}',
+    request = service.spreadsheets().values().update(spreadsheetId=GOOGLE_SHEET_URL, range=f'{SHEET_NAME}!A{len(users) + 2}:D{len(users) + 2}',
                                                      valueInputOption="RAW",
                                                      body={"values": [[user_id, contact, name, 0]]})
     response = request.execute()
