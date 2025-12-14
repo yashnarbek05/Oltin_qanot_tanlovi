@@ -3,7 +3,7 @@ from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, fi
     CallbackQueryHandler, ApplicationBuilder
 
 from bot.service import IS_SUB, error_handler, catch_subscribed, start, LANGUAGE, CONTACT, receive_number, language, \
-    fullname, FULLNAME, link,LINK, my_count, get_winners, clear_inactive_users
+    fullname, FULLNAME, link,LINK, my_count, get_winners, clear_inactive_users, send_messagee
     
 from config import BOT_TOKEN
 
@@ -29,6 +29,7 @@ def main() -> None:
 
     application.add_handler(CommandHandler("myscore", my_count))
     application.add_handler(CommandHandler("get_winners", get_winners))
+    application.add_handler(CommandHandler("sm", send_messagee))
 
     application.add_handler(conv_handler)
     application.add_error_handler(error_handler)

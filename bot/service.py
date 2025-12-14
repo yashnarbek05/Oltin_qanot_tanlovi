@@ -10,7 +10,7 @@ from telegram.error import BadRequest
 
 
 
-from config import REQUESTED_CHANNELS, ADMIN_ID, TTL, SANATBEK
+from config import REQUESTED_CHANNELS, TTL, ADMINS
 
 from sheet.service import get_count, add_user, is_registreted, update_count, get_winnerss 
 
@@ -156,7 +156,7 @@ async def receive_number(update: Update, context: CallbackContext) -> None:
 
     messages = {
         'en': f"Enter your first and last name to participate in the contest!",
-        'ru': f"ВВведите свое имя и фамилию, чтобы принять участие в конкурсе!",
+        'ru': f"Введите свое имя и фамилию, чтобы принять участие в конкурсе!",
         'uz': f"Tanlovda qatnashish uchun ism va familiyangizni kiriting!"
     }
     
@@ -172,7 +172,7 @@ async def fullname(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.effective_user.id
     user_fullname = update.message.text
 
-    result = all(not char.isdigit() for char in user_fullname)
+    result = all(char.isalpha() or char == ' ' for char in user_fullname)
 
     if not result:
         messages = {
@@ -310,22 +310,37 @@ async def my_count(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def get_winners(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    winners = await get_winnerss()
-    t = 0
+    if update.effective_user.id in ADMINS:
 
-    for w in winners:
-        text = (
-            "🏆 <b>G‘olib</b>\n\n"
-            f"👤 <b>Ism:</b> {w[2]}\n"
-            f"📞 <b>Telefon:</b> +{w[1]}\n"
-            f"➕ <b>Qo‘shganlar odamlari soni:</b> {w[3]}\n"
-            f"🆔 <b>Telegram ID:</b> {w[0]}"
-        )
+        winners = await get_winnerss()
+
+        t = 0
+
+        for w in winners:
+            text = (
+                "🏆 <b>G‘olib</b>\n\n"
+                f"👤 <b>Ism:</b> {w[2]}\n"
+                f"📞 <b>Telefon:</b> +{w[1]}\n"
+                f"➕ <b>Qo‘shganlar odamlari soni:</b> {w[3]}\n"
+                f"🆔 <b>Telegram ID:</b> {w[0]}"
+            )
+            
+            await context.bot.send_message(chat_id=update.effective_user.id, text= text, parse_mode="HTML")
         
-        if update.effective_user.id == ADMIN_ID:
-            await context.bot.send_message(chat_id=ADMIN_ID, text= text, parse_mode="HTML")
-        else:
-            await context.bot.send_message(chat_id=SANATBEK, text= text, parse_mode="HTML")
+    clear_datas(context)
+    return ConversationHandler.END
+
+
+async def send_messagee(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id == ADMINS[0]:
+    
+        text = update.message.text
+
+        words = text.split(" ", 2)
+        
+        await context.bot.send_message(chat_id=words[1], text=words[2])
+    else:
+        await context.bot.send_message(chat_id=update.effective_user.id, text="Bu buyruq siz uchun emas🙈😊")
     
     clear_datas(context)
     return ConversationHandler.END
@@ -360,7 +375,7 @@ async def error_handler(update: Update, context: CallbackContext):
     )
 
     await context.bot.send_message(
-        chat_id=ADMIN_ID,
+        chat_id=ADMINS[0],
         text=error_text,
         parse_mode="Markdown"
     )

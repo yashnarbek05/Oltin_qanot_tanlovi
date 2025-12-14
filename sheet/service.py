@@ -34,7 +34,7 @@ async def get_values_from_sheet():
 async def update_count(user_id):
     # count   = D row
 
-    index = 0
+    index = ''
     count = 0
     users = await get_values_from_sheet()
 
@@ -44,7 +44,9 @@ async def update_count(user_id):
             count = users[i][3]
             break
      
-
+    if index == '':
+        return 0
+    
     request = service.spreadsheets().values().update(spreadsheetId=GOOGLE_SHEET_URL, range=f'{SHEET_NAME}!D{index + 2}',
                                                      valueInputOption="RAW",
                                                      body={"values": [[int(count) + 1]]})
