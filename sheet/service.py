@@ -16,7 +16,7 @@ async def get_values_from_sheet():
     try:
         result = sheet.values().get(
             spreadsheetId=GOOGLE_SHEET_URL,
-            range=f"{SHEET_NAME}"
+            range=f"{SHEET_NAME}!A2:D"
         ).execute()
 
         values = result.get("values", [])
@@ -57,7 +57,7 @@ async def get_winnerss():
 
     winners = sorted(
         users,
-        key=lambda x: int(x[3]) if len(x) < 4  else 0,
+        key=lambda x: int(x[3]) if len(x) == 4  else 0,
         reverse=True)[:WINNERS_COUNT]
     
     return winners

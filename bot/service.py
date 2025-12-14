@@ -321,12 +321,11 @@ async def get_winners(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"➕ <b>Qo‘shganlar odamlari soni:</b> {w[3]}\n"
             f"🆔 <b>Telegram ID:</b> {w[0]}"
         )
-        if t == 0: 
-            t = t + 1
-            continue
-
-        await context.bot.send_message(chat_id=ADMIN_ID, text= text, parse_mode="HTML")
-        await context.bot.send_message(chat_id=SANATBEK, text= text, parse_mode="HTML")
+        
+        if update.effective_user.id == ADMIN_ID:
+            await context.bot.send_message(chat_id=ADMIN_ID, text= text, parse_mode="HTML")
+        else:
+            await context.bot.send_message(chat_id=SANATBEK, text= text, parse_mode="HTML")
     
     clear_datas(context)
     return ConversationHandler.END
