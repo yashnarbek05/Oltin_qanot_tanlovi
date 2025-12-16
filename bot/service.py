@@ -145,9 +145,9 @@ async def language(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     keyboard = [[KeyboardButton("📞 Share Your Number", request_contact=True)]]
     reply_markup1 = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
     
-
-    await query.message.reply_text(text = messages.get(query.data), reply_markup=reply_markup1)
-
+    
+    await query.message.reply_text(text = messages.get(query.data, 'uz'), reply_markup=reply_markup1)
+    
     context.user_data['language'] = query.data
 
     return CONTACT
@@ -166,7 +166,7 @@ async def receive_number(update: Update, context: CallbackContext) -> None:
     
     context.user_data["contact"] = contact.phone_number
     
-    await update.message.reply_text(messages.get(context.user_data.get('language'), 'uz'), reply_markup=ReplyKeyboardRemove())
+    await update.message.reply_text(messages.get(context.user_data.get('language'), messages.get('uz')), reply_markup=ReplyKeyboardRemove())
 
     return FULLNAME
 
@@ -183,7 +183,7 @@ async def fullname(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             'ru': f"Вы неправильно ввели свое полное имя: \"{user_fullname}\"😕, \nотправьте еще раз...",
             'en': f"You have entered your full name incorrectly: \"{user_fullname}\"😕, \nsend again..."
         }
-        await update.message.reply_text(messages.get(context.user_data.get('language'), 'uz'))
+        await update.message.reply_text(messages.get(context.user_data.get('language'), messages.get('uz')))
         return FULLNAME
 
     await add_user(user_id, context.user_data.get("contact"), user_fullname)
@@ -248,7 +248,7 @@ async def fullname(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 )
         }
     
-    await update.message.reply_text(messages.get(context.user_data.get('language'), 'uz'),
+    await update.message.reply_text(messages.get(context.user_data.get('language'), messages.get('uz')),
                                      reply_markup=InlineKeyboardMarkup(keyboard),
                                      parse_mode="Markdown")
     
@@ -290,7 +290,7 @@ async def link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_photo(
             chat_id=update.effective_chat.id,
             photo=file_id,
-            caption=messages.get(context.user_data.get('language'), 'uz'),
+            caption=messages.get(context.user_data.get('language'), messages.get('uz')),
             parse_mode="Markdown"
         )
     
@@ -300,7 +300,7 @@ async def link(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'en': "You can show your accumulated points by issuing this command /myscore!"
     }
 
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=messages.get(context.user_data.get('language'), 'uz'))
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=messages.get(context.user_data.get('language'), messages.get('uz')))
 
     clear_datas(context)
     return ConversationHandler.END
@@ -397,7 +397,7 @@ async def cancel(update: Update, context: CallbackContext):
         'ru': 'Отменено!',
         'en': 'Cancelled!'
     }
-    await update.message.reply_text(messages.get(context.user_data.get('language')))
+    await update.message.reply_text(messages.get(context.user_data.get('language'), messages.get('uz')))
     clear_datas(context)
     return ConversationHandler.END
 
