@@ -11,7 +11,7 @@ from telegram.error import BadRequest, TelegramError
 
 
 
-from config import REQUESTED_CHANNELS, TTL, ADMINS, BANNED
+from config import REQUESTED_CHANNELS, ADMINS, BANNED
 
 from sheet.service import get_count, add_user, is_registreted, update_count, get_winnerss 
 
