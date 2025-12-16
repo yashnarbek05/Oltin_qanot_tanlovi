@@ -22,6 +22,8 @@ FULLNAME = 3
 LINK = 4
 
 async def start(update, context):
+    clear_datas(context)
+
     user_id = update.effective_user.id
 
     text = update.message.text.split(" ")
@@ -164,7 +166,7 @@ async def receive_number(update: Update, context: CallbackContext) -> None:
     
     context.user_data["contact"] = contact.phone_number
     
-    await update.message.reply_text(messages.get(context.user_data.get('language')), reply_markup=ReplyKeyboardRemove())
+    await update.message.reply_text(messages.get(context.user_data.get('language'), 'uz'), reply_markup=ReplyKeyboardRemove())
 
     return FULLNAME
 
@@ -181,7 +183,7 @@ async def fullname(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             'ru': f"Вы неправильно ввели свое полное имя: \"{user_fullname}\"😕, \nотправьте еще раз...",
             'en': f"You have entered your full name incorrectly: \"{user_fullname}\"😕, \nsend again..."
         }
-        await update.message.reply_text(messages.get(context.user_data.get('language')))
+        await update.message.reply_text(messages.get(context.user_data.get('language'), 'uz'))
         return FULLNAME
 
     await add_user(user_id, context.user_data.get("contact"), user_fullname)
@@ -246,7 +248,7 @@ async def fullname(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 )
         }
     
-    await update.message.reply_text(messages.get(context.user_data.get('language')),
+    await update.message.reply_text(messages.get(context.user_data.get('language'), 'uz'),
                                      reply_markup=InlineKeyboardMarkup(keyboard),
                                      parse_mode="Markdown")
     
@@ -288,7 +290,7 @@ async def link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_photo(
             chat_id=update.effective_chat.id,
             photo=file_id,
-            caption=messages.get(context.user_data.get('language')),
+            caption=messages.get(context.user_data.get('language'), 'uz'),
             parse_mode="Markdown"
         )
     
@@ -298,7 +300,7 @@ async def link(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'en': "You can show your accumulated points by issuing this command /myscore!"
     }
 
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=messages.get(context.user_data.get('language')))
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=messages.get(context.user_data.get('language'), 'uz'))
 
     clear_datas(context)
     return ConversationHandler.END
@@ -386,26 +388,17 @@ async def error_handler(update: Update, context: CallbackContext):
         parse_mode="Markdown"
     )
 
-    clear_datas(context)
     return ConversationHandler.END
 
 
-
-async def clear_inactive_users(context: ContextTypes.DEFAULT_TYPE):
-    now = time.time()
-    to_delete = []
-
-    for user_id, data in context.application.user_data.items():
-        last = data.get("last_active")
-        if last and now - last > TTL:
-            to_delete.append(user_id)
-
-    for user_id in to_delete:
-        del context.application.user_data[user_id]
-
-
-
-
-
+async def cancel(update: Update, context: CallbackContext):
+    messages = {
+        'uz': 'Bekor qilindi!',
+        'ru': 'Отменено!',
+        'en': 'Cancelled!'
+    }
+    await update.message.reply_text(messages.get(context.user_data.get('language')))
+    clear_datas(context)
+    return ConversationHandler.END
 
 

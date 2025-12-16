@@ -3,7 +3,7 @@ from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, fi
     CallbackQueryHandler, ApplicationBuilder
 
 from bot.service import IS_SUB, error_handler, catch_subscribed, start, LANGUAGE, CONTACT, receive_number, language, \
-    fullname, FULLNAME, link,LINK, my_count, get_winners, clear_inactive_users, send_messagee
+    fullname, FULLNAME, link,LINK, my_count, get_winners, send_messagee, cancel
     
 from config import BOT_TOKEN
 
@@ -19,12 +19,13 @@ def main() -> None:
             IS_SUB: [
                 CallbackQueryHandler(catch_subscribed, pattern="^sub$")
             ],
-            LANGUAGE: [CallbackQueryHandler(language)],
-            CONTACT: [MessageHandler(filters.CONTACT, receive_number)],
-            FULLNAME: [MessageHandler(filters.TEXT, fullname)],
-            LINK: [CallbackQueryHandler(link, pattern="^link$")],
+            LANGUAGE: [CommandHandler('cancel', cancel),CallbackQueryHandler(language)],
+            CONTACT: [CommandHandler('cancel', cancel),MessageHandler(filters.CONTACT, receive_number)],
+            FULLNAME: [CommandHandler('cancel', cancel),MessageHandler(filters.TEXT, fullname)],
+            LINK: [CommandHandler('cancel', cancel),CallbackQueryHandler(link, pattern="^link$")],
+            
     },
-    fallbacks=[]
+    fallbacks=[CommandHandler('cancel', cancel)],
     )   
 
     application.add_handler(CommandHandler("myscore", my_count))
@@ -34,12 +35,6 @@ def main() -> None:
     application.add_handler(conv_handler)
     application.add_error_handler(error_handler)
 
-    application.job_queue.run_repeating(
-        clear_inactive_users,
-        interval=300,  # 5 minutda tekshiradi
-        first=300
-    )
-    
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
