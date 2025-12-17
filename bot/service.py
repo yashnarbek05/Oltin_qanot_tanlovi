@@ -317,11 +317,11 @@ async def get_winners(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         winners = await get_winnerss()
 
-        t = 0
+        t = 1
 
         for w in winners:
             text = (
-                "🏆 <b>G‘olib</b>\n\n"
+                f"🏆 {t}) <b>G‘olib</b>\n\n"
                 f"👤 <b>Ism:</b> {w[2]}\n"
                 f"📞 <b>Telefon:</b> +{w[1]}\n"
                 f"➕ <b>Qo‘shganlar odamlari soni:</b> {w[3]}\n"
@@ -329,10 +329,29 @@ async def get_winners(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             
             await context.bot.send_message(chat_id=update.effective_user.id, text= text, parse_mode="HTML")
+            t = t + 1
         
     clear_datas(context)
     return ConversationHandler.END
 
+
+async def get_winners_for_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id in ADMINS:
+
+        winners = await get_winnerss()
+
+        t = 1
+        text = "Tanlovimiz g'oliblari 🥳\n"
+        for w in winners:
+            text = text + (
+                f"{t}) 👤: {w[2]} 🅱️: {w[3]}\n"
+            )
+            
+            t = t + 1
+        await context.bot.send_message(chat_id=update.effective_user.id, text= text, parse_mode="HTML")
+        
+    clear_datas(context)
+    return ConversationHandler.END
 
 async def send_messagee(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id == ADMINS[0]:
