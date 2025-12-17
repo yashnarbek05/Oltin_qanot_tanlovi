@@ -29,8 +29,8 @@ def main() -> None:
     )   
 
     application.add_handler(CommandHandler("myscore", my_count))
-    application.add_handler(CommandHandler("get_win", get_winners))
-    application.add_handler(CommandHandler("get_winners", get_winners_for_users))
+    application.add_handler(CommandHandler("get_winners", get_winners))
+    application.add_handler(CommandHandler("winners", get_winners_for_users))
     application.add_handler(CommandHandler("sm", send_messagee))
 
     application.add_handler(conv_handler)
