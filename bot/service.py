@@ -175,7 +175,7 @@ async def fullname(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.effective_user.id
     user_fullname = update.message.text
 
-    result = all(char.isalpha() or char == ' ' for char in user_fullname)
+    result = all(char.isalpha() or char == ' ' or not char.isnumeric() for char in user_fullname)
 
     if not result:
         messages = {
