@@ -4,7 +4,7 @@ from telegram.ext import (
     ConversationHandler, CallbackContext,
 )
 
-
+import string
 import traceback, time
 
 from telegram.error import BadRequest, TelegramError
