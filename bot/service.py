@@ -45,7 +45,7 @@ async def start(update, context):
         await send_subscribe_message(user_id, context)
         return IS_SUB
 
-    await update.message.reply_text("Xush kelibsiz! 🎉")
+    await update.message.reply_text("🎉 “Oltin Qanot” volontyorlari Respublika tanloviga xush kelibsiz! 🎉")
 
     if invited_by: 
         await update_count(invited_by)
@@ -111,7 +111,7 @@ async def catch_subscribed(update: Update, context: ContextTypes.DEFAULT_TYPE):
     is_subscribed = await check_user_in_channels(user_id, context)
 
     if is_subscribed:
-        await query.edit_message_text("✅ Obuna tasdiqlandi. Davom etishingiz mumkin.")
+        await query.edit_message_text("✅ Obuna tasdiqlandi. 🎉 “Oltin Qanot” volontyorlari Respublika tanloviga xush kelibsiz! 🎉")
         if context.user_data.get("invited_by"): 
             await update_count(context.user_data.get("invited_by"))
         keyboard = [
@@ -197,80 +197,68 @@ async def fullname(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     messages = {
         'uz': (
             "🎉 *“Oltin Qanot” volontyorlari Respublika tanloviga xush kelibsiz!* 🎉\n\n"
-            "Ushbu tanlovda ishtirok etish uchun bot orqali sizga berilgan maxsus havola yordamida "
-            "do‘stlaringizni taklif qiling va g‘oliblar safidan joy oling!\n\n"
-            "🏆 *G‘oliblar quyidagicha taqdirlanadi:*\n\n"
-            "💎 *1-o‘rin:*\n"
-            "— *“YIL FAOLI”* nomli statuetka\n"
-            "— Diplom va Tavsiyanoma xati\n"
-            "— Humo Arenada bo‘lib o‘tadigan konsert uchun chipta\n"
-            "— Tashakkurnoma\n\n"
-            "🥇 *2–10-o‘rinlar:*\n"
-            "— Diplom va Sertifikat\n"
-            "— Humo Arenada bo‘lib o‘tadigan konsert uchun chiptalar\n"
-            "— Tashakkurnoma\n"
-            "— Barcha oflayn loyihalarda tashkilotchilik va koordinatorlik imkoniyati\n"
-            "— 1 oylik loyihalarda bepul ishtirok etish\n"
-            "— Tasdiqlovchi bejik hamda xayriya loyihalarida ishtirok etish imkoniyati (bayonnoma beriladi)\n\n"
-            "🥈 *11–20-o‘rinlar:*\n"
-            "— Diplom\n"
-            "— Kitoblar\n"
-            "— Sertifikatlar\n\n"
-            "🥉 *21–40-o‘rinlar:*\n"
-            "— Sertifikatlar\n\n"
-            "👇 *Quyidagi tugmani bosing va o‘z taklifnomangizni do‘stlaringizga yuboring*"
+            "Ushbu tanlovda ishtirok etish uchun, bot orqali sizga berilgan maxsus havolalar yordamida "
+            "do'stlaringizni taklif qiling va g'oliblar safidan joy oling!\n\n"
+            "🏆 *G'oliblar quyidagicha bepul loyihada ishtirok etadilar va taqdirlanadi:*\n\n"
+            "🥇 *1–10-o'rinlar:*\n"
+            "— Xalqaro Diplom va Minnatdorchilik xati\n"
+            "— *INTERNATIONAL YOUTH PEACE SUMMIT-2*\n"
+            "— Sertifikatlar\n"
+            "— Shashka va shaxmatda bepul ishtirok\n"
+            "— *EKO QANOT MARAFONI – 6*\n\n"
+            "🥈 *10–30-o'rinlar:*\n"
+            "— Xalqaro Diplom\n"
+            "— *INTERNATIONAL YOUTH PEACE SUMMIT-2*\n"
+            "— Sertifikatlar\n"
+            "— Tashakkurnomalar\n\n"
+            "🥉 *30–40-o'rinlar:*\n"
+            "— Sertifikatlar\n"
+            "— Tashakkurnomalar\n\n"
+            "👇 *Quyidagi tugmani bosing va o'z taklifnomangizni do'stlaringizga yuboring* 😊"
         ),
 
         'ru': (
-            "🎉 *Добро пожаловать на Республиканский конкурс волонтёров “Oltin Qanot”!* 🎉\n\n"
-            "Чтобы принять участие, пригласите своих друзей с помощью специальной ссылки, "
-            "предоставленной этим ботом, и займите место среди победителей.\n\n"
-            "🏆 *Победители будут награждены следующим образом:*\n\n"
-            "💎 *1 место:*\n"
-            "— Статуэтка *«АКТИВИСТ ГОДА»*\n"
-            "— Диплом и рекомендательное письмо\n"
-            "— Билет на концерт в Humo Arena\n"
-            "— Благодарственное письмо\n\n"
-            "🥇 *2–10 места:*\n"
-            "— Диплом и сертификат\n"
-            "— Билеты на концерт в Humo Arena\n"
-            "— Благодарственное письмо\n"
-            "— Возможность быть организатором и координатором во всех офлайн-проектах\n"
-            "— Бесплатное участие в проектах в течение 1 месяца\n"
-            "— Подтверждающий бейдж и участие в благотворительных проектах (выдается протокол)\n\n"
-            "🥈 *11–20 места:*\n"
-            "— Диплом\n"
-            "— Книги\n"
-            "— Сертификаты\n\n"
-            "🥉 *21–40 места:*\n"
-            "— Сертификаты\n\n"
-            "👇 *Нажмите кнопку ниже и отправьте приглашение своим друзьям*"
+            "🎉 *Добро пожаловать на Республиканский конкурс волонтёров «Oltin Qanot»!* 🎉\n\n"
+            "Чтобы принять участие в конкурсе, пригласите своих друзей с помощью специальных ссылок, "
+            "предоставленных этим ботом, и займите место среди победителей!\n\n"
+            "🏆 *Победители получат возможность бесплатно участвовать в проектах и будут награждены следующим образом:*\n\n"
+            "🥇 *1–10 места:*\n"
+            "— Международный диплом и благодарственное письмо\n"
+            "— *INTERNATIONAL YOUTH PEACE SUMMIT-2*\n"
+            "— Сертификаты\n"
+            "— Бесплатное участие в соревнованиях по шашкам и шахматам\n"
+            "— *EKO QANOT MARAFONI – 6*\n\n"
+            "🥈 *10–30 места:*\n"
+            "— Международный диплом\n"
+            "— *INTERNATIONAL YOUTH PEACE SUMMIT-2*\n"
+            "— Сертификаты\n"
+            "— Благодарственные письма\n\n"
+            "🥉 *30–40 места:*\n"
+            "— Сертификаты\n"
+            "— Благодарственные письма\n\n"
+            "👇 *Нажмите кнопку ниже и отправьте своё приглашение друзьям* 😊"
         ),
 
         'en': (
             "🎉 *Welcome to the “Oltin Qanot” Volunteers National Contest!* 🎉\n\n"
-            "To participate, invite your friends using the special link provided through this bot "
-            "and secure your place among the winners.\n\n"
-            "🏆 *Winners will be rewarded as follows:*\n\n"
-            "💎 *1st place:*\n"
-            "— *“ACTIVIST OF THE YEAR”* statuette\n"
-            "— Diploma and Letter of Recommendation\n"
-            "— Ticket to the concert at Humo Arena\n"
-            "— Letter of Appreciation\n\n"
-            "🥇 *2nd–10th places:*\n"
-            "— Diploma and Certificate\n"
-            "— Concert tickets at Humo Arena\n"
-            "— Letter of Appreciation\n"
-            "— Opportunity to act as organizer or coordinator in all offline projects\n"
-            "— Free participation in projects for 1 month\n"
-            "— Verified badge and participation in charity projects (official record provided)\n\n"
-            "🥈 *11th–20th places:*\n"
-            "— Diploma\n"
-            "— Books\n"
-            "— Certificates\n\n"
-            "🥉 *21st–40th places:*\n"
-            "— Certificates\n\n"
-            "👇 *Click the button below and send your invitation to your friends*"
+            "To participate, invite your friends using the special invitation links provided through this bot "
+            "and secure your place among the winners!\n\n"
+            "🏆 *Winners will receive free participation in projects and be rewarded as follows:*\n\n"
+            "🥇 *1st–10th places:*\n"
+            "— International Diploma and Letter of Appreciation\n"
+            "— *INTERNATIONAL YOUTH PEACE SUMMIT-2*\n"
+            "— Certificates\n"
+            "— Free participation in checkers and chess competitions\n"
+            "— *EKO QANOT MARATHON – 6*\n\n"
+            "🥈 *10th–30th places:*\n"
+            "— International Diploma\n"
+            "— *INTERNATIONAL YOUTH PEACE SUMMIT-2*\n"
+            "— Certificates\n"
+            "— Letters of Appreciation\n\n"
+            "🥉 *30th–40th places:*\n"
+            "— Certificates\n"
+            "— Letters of Appreciation\n\n"
+            "👇 *Click the button below and send your invitation to your friends* 😊"
         )
     }
     
