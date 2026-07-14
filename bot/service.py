@@ -284,19 +284,19 @@ async def link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     "🎉 *Do‘stim!* 🎉\n\n"
     "Sen ham shu tanlovga qatnash! 🏆\n"
     "Juda koʻp sovgʻalar va ajoyib imkoniyatlar seni kutmoqda ✨🎁\n\n"
-    f"👇 *Ushbu linkni bos va kanallarga azo bo‘lish orqali tanlovda ishtirok et:* \nhttps://t.me/Oltinqanottanlovibot?start={user_id}"
+    f"👇 *Ushbu linkni bos va kanallarga azo bo‘lish orqali tanlovda ishtirok et:* \n[Tanlovda ishtirok etish✅](https://t.me/Oltinqanottanlovibot?start={user_id})"
 ),
             'ru': (
     "🎉 *Привет, друг!* 🎉\n\n"
     "Прими участие в этом конкурсе! 🏆\n"
     "Тебя ждёт много подарков и крутых возможностей ✨🎁\n\n"
-    f"👇 *Нажми на эту ссылку и подпишись на каналы, чтобы участвовать в конкурсе:* \nhttps://t.me/Oltinqanottanlovibot?start={user_id}"
+    f"👇 *Нажми на эту ссылку и подпишись на каналы, чтобы участвовать в конкурсе:* \n[Принять участие в конкурсе✅](https://t.me/Oltinqanottanlovibot?start={user_id})"
 ),
             'en': (
     "🎉 *Hey friend!* 🎉\n\n"
     "Join this contest too! 🏆\n"
     "Lots of amazing gifts and opportunities are waiting for you ✨🎁\n\n"
-    f"👇 *Click this link and subscribe to the channels to participate in the contest:* \nhttps://t.me/Oltinqanottanlovibot?start={user_id}"
+    f"👇 *Click this link and subscribe to the channels to participate in the contest:* \n[Participate in the contest✅](https://t.me/Oltinqanottanlovibot?start={user_id})"
 )
         }
 
